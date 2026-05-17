@@ -1,3 +1,3 @@
-from . import lowered, traced, wrapped
+from . import compile, lower, lowered, traced, wrapped  # noqa: A004
 
-__all__ = ["lowered", "traced", "wrapped"]
+__all__ = ["compile", "lower", "lowered", "traced", "wrapped"]
