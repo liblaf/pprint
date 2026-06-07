@@ -1,5 +1,5 @@
 # ref: <https://github.com/ofek/hatch-vcs>
-# ref: <https://github.com/pypa/setuptools-scm/blob/58ed7d5dec0e3bc80190f73543cf4d8a6876ba8e/src/setuptools_scm/_integration/dump_version.py#L16-L51>
+# ref: <https://github.com/pypa/setuptools-scm/blob/5d34df72c40f3177d767174e5e9bc0e65f67a047/vcs-versioning/src/vcs_versioning/_dump_version.py#L31-L56>
 __commit_id__: str | None
 __version__: str
 __version_tuple__: tuple[int | str, ...]

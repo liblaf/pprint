@@ -30,8 +30,8 @@ dependencies = [
   "environs>=14.1",
   "fieldz>=0.1",
   "lazy-loader>=0.1",
-  "liblaf-conf>=0.1.1",
-  "rich>=14.3"
+  "liblaf-conf>=0.1.2",
+  "rich>=14.3",
 ]
 dynamic = ["version"]
 
@@ -54,9 +54,9 @@ docs = [
   "griffe-pydantic>=1",
   "griffe-warnings-deprecated>=1",
   "mkdocstrings[python]>=1",
-  "zensical>=0.0.36"
+  "zensical>=0.0.44"
 ]
-lint = ["import-linter[ui]>=2", "ruff>=0.15"]
+lint = ["import-linter[ui]>=2", "pyrefly>=1", "ruff>=0.15"]
 nox = ["liblaf-nox-recipes>=0.1", "nox>=2026", "nox-uv>=0.7"]
 test = [
   "pytest>=9",
@@ -96,6 +96,14 @@ root_package = "liblaf.pretty"
 ancestors = ["liblaf.pretty"]
 name = "Acyclic siblings"
 type = "acyclic_siblings"
+
+[tool.pyrefly]
+preset = "strict"
+
+[tool.pyrefly.errors]
+redefinition = "ignore"
+implicit-any = "ignore"
+unbound-name = "ignore"
 
 [tool.pytest]
 addopts = [

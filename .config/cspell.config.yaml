@@ -33,6 +33,7 @@ words:
   - mkdocstrings
   - ndarray
   - numpy
+  - orhun
   - oxfmt
   - oxlint
   - pformat
@@ -55,7 +56,6 @@ words:
   - tombi
   - trimesh
   - twemoji
-  - uncomparable
   - unorderable
   - venv
   - virtualenv

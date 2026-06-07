@@ -1,141 +1,103 @@
+from __future__ import annotations
+
 import contextlib
-import functools
 from collections.abc import Generator, Iterable
 from typing import Self
 
 import attrs
+import rich
 from rich.console import Console, ConsoleOptions, RenderableType
 from rich.containers import Renderables
 from rich.segment import Segment
-from rich.text import Text
 
-from ._capture import Capture, CompileContextSnapshot, Compiled
-from ._segments import Prefix
-
-
-def _default_console() -> Console:
-    return Console(soft_wrap=True, markup=False, emoji=False, highlight=False)
+from ._capture import Capture, Compiled
+from ._segment import Segments
+from ._stop import Flags, PrettyCompileError
 
 
 @attrs.define
 class CompileContext:
-    console: Console = attrs.field(factory=_default_console)
-    prefix: Prefix = attrs.field(factory=Prefix, kw_only=True)
+    def _default_console() -> Console:
+        return rich.get_console()
 
     def _default_options(self) -> ConsoleOptions:
         return self.console.options.update(
             overflow="ignore", no_wrap=True, highlight=False, markup=False
         )
 
+    console: Console = attrs.field(factory=_default_console)
+    _capture: Capture = attrs.field(factory=Capture, repr=False)
+    _column: int = 0
     _options: ConsoleOptions = attrs.field(
-        default=attrs.Factory(_default_options, takes_self=True), kw_only=True
+        default=attrs.Factory(_default_options, takes_self=True)
     )
-
-    captures: list[Capture] = attrs.field(factory=list)
-    _column: int = attrs.field(default=0)
-
-    @property
-    def column(self) -> int:
-        return self._column
-
-    @column.setter
-    def column(self, value: int) -> None:
-        self._column = value
-        if self._column > self._options.max_width:
-            for capture in self.captures:
-                capture.fits = False
+    _prefix: Segments = attrs.field(factory=Segments)
+    _stop: Flags = Flags.NONE
 
     @property
     def options(self) -> ConsoleOptions:
-        return self._options.update(
-            max_width=max(self._options.max_width - self.prefix.width, 1)
-        )
-
-    def capture(self) -> Capture:
-        return Capture(context=self)
-
-    def clone(self) -> Self:
-        return attrs.evolve(self, captures=[])
-
-    def commit(self, compiled: Compiled) -> None:
-        self._extend_segments(compiled)
-        if not compiled.fits:
-            self._overflow()
-        self.column = compiled.context.column
-        self.console = compiled.context.console
-        self._options = compiled.context.options
-        self.prefix = compiled.context.prefix
+        width: int = max(self.console.width - max(self._column, self._prefix.width), 1)
+        return self._options.update_width(width)
 
     @contextlib.contextmanager
-    def indent(self, indent: Text) -> Generator[None]:
-        prefix_old: Prefix = self.prefix
-        self.prefix = Prefix(self._render(self.prefix, indent))
+    def capture(self, *, stop: Flags | None = None) -> Generator[Capture]:
+        capture: Capture = Capture()
+        saved: dict[str, object] = attrs.asdict(self, recurse=False)
+        self._capture = capture
+        if stop is not None:
+            self._stop = stop
         try:
-            yield
+            yield capture
+        except PrettyCompileError as err:
+            capture.stop = err.flag
         finally:
-            self.prefix = prefix_old
+            for key, value in saved.items():
+                setattr(self, key, value)
+
+    @contextlib.contextmanager
+    def indent(self, *indent: RenderableType) -> Generator[Self]:
+        saved: Segments = self._prefix
+        self._prefix = Segments(
+            self._render(self._prefix, *indent, options=self._options)
+        )
+        try:
+            yield self
+        finally:
+            self._prefix = saved
 
     def newline(self) -> None:
-        self._append_segment(Segment.line())
-        self.column = 0
-
-    def preview(self, *renderables: RenderableType) -> Compiled:
-        ctx: Self = self.clone()
-        with ctx.capture() as capture:
-            ctx.print(*renderables)
-        return capture.get()
+        self._capture.append(Segment.line())
+        self._column = 0
+        self._set_flag(Flags.NEWLINE)
 
     def print(self, *renderables: RenderableType) -> None:
-        for line, newline in Segment.split_lines_terminator(self._render(*renderables)):
-            if self.column == 0:
-                self._extend_segments(self.prefix)
-                self.column += self.prefix.width
-            self._extend_segments(line)
-            self.column += sum(segment.cell_length for segment in line)
+        segments: Iterable[Segment] = self._render(*renderables)
+        for line, newline in Segment.split_lines_terminator(segments):
+            if self._column == 0:
+                self._capture += self._prefix
+                self._column += self._prefix.width
+            self._capture += line
+            self._column += sum(segment.cell_length for segment in line)
+            if self._column > self._options.max_width:
+                self._set_flag(Flags.OVERFLOW)
             if newline:
                 self.newline()
 
-    def snapshot(self) -> CompileContextSnapshot:
-        return CompileContextSnapshot(
-            column=self.column,
-            console=self.console,
-            options=self._options,
-            prefix=self.prefix,
-        )
+    def render(
+        self, *renderables: RenderableType, stop: Flags | None = None
+    ) -> Compiled:
+        with self.capture(stop=stop) as capture:
+            self.print(*renderables)
+        return capture.get()
 
-    def _append_segment(self, segment: Segment) -> None:
-        for capture in self.captures:
-            capture.data.append(segment)
+    def _render(
+        self, *renderables: RenderableType, options: ConsoleOptions | None = None
+    ) -> Iterable[Segment]:
+        if options is None:
+            options = self.options
+        return self.console.render(Renderables(renderables), options)
 
-    def _extend_segments(self, segments: Iterable[Segment]) -> None:
-        for capture in self.captures:
-            capture.data.extend(segments)
-
-    def _overflow(self) -> None:
-        for capture in self.captures:
-            capture.fits = False
-
-    def _render(self, *renderables: RenderableType) -> Iterable[Segment]:
-        renderables: list[RenderableType] = [
-            _patch_renderable(renderable) for renderable in renderables
-        ]
-        return self.console.render(Renderables(renderables), options=self.options)
-
-
-@functools.singledispatch
-def _patch_renderable(renderable: RenderableType) -> RenderableType:
-    return renderable
-
-
-@_patch_renderable.register
-def _(renderable: str) -> Text:
-    return Text(renderable, overflow="ignore", no_wrap=True, end="")
-
-
-@_patch_renderable.register
-def _(renderable: Text) -> Text:
-    renderable: Text = renderable.copy()
-    renderable.overflow = "ignore"
-    renderable.no_wrap = True
-    renderable.end = ""
-    return renderable
+    def _set_flag(self, flag: Flags) -> None:
+        self._capture.flags |= flag
+        if flag in self._stop:
+            raise PrettyCompileError(flag)
