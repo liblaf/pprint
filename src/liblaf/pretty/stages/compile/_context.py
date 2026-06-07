@@ -11,8 +11,8 @@ from rich.containers import Renderables
 from rich.segment import Segment
 
 from ._capture import Capture, Compiled
+from ._flags import PrettyCompileError, StopReason
 from ._segment import Segments
-from ._stop import Flags, PrettyCompileError
 
 
 @attrs.define
@@ -32,7 +32,7 @@ class CompileContext:
         default=attrs.Factory(_default_options, takes_self=True)
     )
     _prefix: Segments = attrs.field(factory=Segments)
-    _stop: Flags = Flags.NONE
+    _stop: StopReason = StopReason.NONE
 
     @property
     def options(self) -> ConsoleOptions:
@@ -40,7 +40,7 @@ class CompileContext:
         return self._options.update_width(width)
 
     @contextlib.contextmanager
-    def capture(self, *, stop: Flags | None = None) -> Generator[Capture]:
+    def capture(self, *, stop: StopReason | None = None) -> Generator[Capture]:
         capture: Capture = Capture()
         saved: dict[str, object] = attrs.asdict(self, recurse=False)
         self._capture = capture
@@ -68,7 +68,7 @@ class CompileContext:
     def newline(self) -> None:
         self._capture.append(Segment.line())
         self._column = 0
-        self._set_flag(Flags.NEWLINE)
+        self._set_flag(StopReason.NEWLINE)
 
     def print(self, *renderables: RenderableType) -> None:
         segments: Iterable[Segment] = self._render(*renderables)
@@ -79,12 +79,12 @@ class CompileContext:
             self._capture += line
             self._column += sum(segment.cell_length for segment in line)
             if self._column > self._options.max_width:
-                self._set_flag(Flags.OVERFLOW)
+                self._set_flag(StopReason.OVERFLOW)
             if newline:
                 self.newline()
 
     def render(
-        self, *renderables: RenderableType, stop: Flags | None = None
+        self, *renderables: RenderableType, stop: StopReason | None = None
     ) -> Compiled:
         with self.capture(stop=stop) as capture:
             self.print(*renderables)
@@ -97,7 +97,7 @@ class CompileContext:
             options = self.options
         return self.console.render(Renderables(renderables), options)
 
-    def _set_flag(self, flag: Flags) -> None:
+    def _set_flag(self, flag: StopReason) -> None:
         self._capture.flags |= flag
         if flag in self._stop:
             raise PrettyCompileError(flag)
