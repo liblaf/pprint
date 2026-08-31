@@ -2,7 +2,7 @@
 # ref: <https://packaging.python.org/en/latest/specifications/pyproject-toml/>
 
 [project]
-name = "liblaf-pretty"
+name = "liblaf-pprint"
 description = "Format Python objects as repr-like plain text or width-aware Rich renderables."
 readme = "README.md"
 requires-python = ">=3.12"
@@ -37,13 +37,13 @@ dynamic = ["version"]
 
 [project.urls]
 # ref: <https://packaging.python.org/en/latest/specifications/well-known-project-urls/#well-known-labels>
-"Changelog" = "https://github.com/liblaf/pretty/blob/main/CHANGELOG.md"
-"Documentation" = "https://liblaf.github.io/pretty/"
-"Funding" = "https://github.com/liblaf/pretty?sponsor=1"
-"Homepage" = "https://github.com/liblaf/pretty"
-"Issue Tracker" = "https://github.com/liblaf/pretty/issues"
-"Release Notes" = "https://github.com/liblaf/pretty/releases"
-"Source Code" = "https://github.com/liblaf/pretty"
+"Changelog" = "https://github.com/liblaf/pprint/blob/main/CHANGELOG.md"
+"Documentation" = "https://liblaf.github.io/pprint/"
+"Funding" = "https://github.com/liblaf/pprint?sponsor=1"
+"Homepage" = "https://github.com/liblaf/pprint"
+"Issue Tracker" = "https://github.com/liblaf/pprint/issues"
+"Release Notes" = "https://github.com/liblaf/pprint/releases"
+"Source Code" = "https://github.com/liblaf/pprint"
 
 [dependency-groups]
 dev = ["cupy-cuda13x>=14", "jax>=0.10", "numpy>=2", "torch>=2", "warp-lang>=1"]
@@ -54,12 +54,13 @@ docs = [
   "griffe-pydantic>=1",
   "griffe-warnings-deprecated>=1",
   "mkdocstrings[python]>=1",
-  "zensical>=0.0.36"
+  "zensical>=0.0.44"
 ]
-lint = ["import-linter[ui]>=2", "ruff>=0.15"]
-nox = ["liblaf-nox-recipes>=0.1", "nox>=2026", "nox-uv>=0.7"]
+lint = ["import-linter[ui]>=2", "ruff>=0.15", "ty>=0.0.40"]
+nox = ["nox>=2026"]
 test = [
   "pytest>=9",
+  "pytest-codspeed>=4",
   "pytest-cov>=7",
   "pytest-randomly>=4",
   { include-group = "dev" }
@@ -77,7 +78,7 @@ branch = true
 source = ["src"]
 
 [tool.hatch.build.hooks.vcs]
-version-file = "src/liblaf/pretty/_version.py"
+version-file = "src/liblaf/pprint/_version.py"
 
 [tool.hatch.build.targets.sdist]
 only-include = ["src"]
@@ -90,10 +91,10 @@ source = "vcs"
 
 [tool.importlinter]
 exclude_type_checking_imports = true
-root_package = "liblaf.pretty"
+root_package = "liblaf.pprint"
 
 [[tool.importlinter.contracts]]
-ancestors = ["liblaf.pretty"]
+ancestors = ["liblaf.pprint"]
 name = "Acyclic siblings"
 type = "acyclic_siblings"
 
@@ -110,7 +111,7 @@ strict = true
 testpaths = ["benches", "src", "tests"]
 
 [tool.ruff]
-extend = ".config/linters/.ruff.toml"
+extend = ".config/linters/ruff.toml"
 
 [tool.uv]
 default-groups = "all"

@@ -7,12 +7,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Conventional Changelog](https://github.com/conventional-changelog/conventional-changelog-config-spec/blob/master/versions/2.2.0/README.md),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [v0.2.0](https://github.com/liblaf/pretty/releases/tag/v0.2.0) - 2026-05-05
+## [v0.2.0](https://github.com/liblaf/pprint/releases/tag/v0.2.0) - 2026-05-05
 
 ### 💥 BREAKING CHANGES
 
-- **(pretty)** top-level PrettyOptions, Spec types, pdoc, and registry helpers are no longer exported; custom pretty hooks now use **pretty**(ctx, depth), and formatting options are passed as keyword overrides instead of a PrettyOptions object. - [b05a605](https://github.com/liblaf/pretty/commit/b05a605178de5dc980c63f3f42173f0d8458f777) by [@liblaf](https://github.com/liblaf)
-- **(pretty)** the old internal \_conf, \_describe, \_lower, \_spec, and \_trace modules are replaced by common, custom, literals, and stages packages, and custom **pretty** hooks now receive only ctx instead of ctx, depth - [4320439](https://github.com/liblaf/pretty/commit/432043900a96f0e0d97c38b9b1a2c21064e164af) by [@liblaf](https://github.com/liblaf)
+- **(pretty)** top-level PrettyOptions, Spec types, pdoc, and registry helpers are no longer exported; custom pretty hooks now use **pretty**(ctx, depth), and formatting options are passed as keyword overrides instead of a PrettyOptions object. - [b05a605](https://github.com/liblaf/pprint/commit/b05a605178de5dc980c63f3f42173f0d8458f777) by [@liblaf](https://github.com/liblaf)
+- **(pretty)** the old internal \_conf, \_describe, \_lower, \_spec, and \_trace modules are replaced by common, custom, literals, and stages packages, and custom **pretty** hooks now receive only ctx instead of ctx, depth - [4320439](https://github.com/liblaf/pprint/commit/432043900a96f0e0d97c38b9b1a2c21064e164af) by [@liblaf](https://github.com/liblaf)
 - **(api)** `pformat()` now returns `str` instead of `LoweredNode`.
   Use `plower()` for the old behavior where a Rich renderable is returned.
 
@@ -23,70 +23,70 @@ Split the public API into two clear paths:
 
 This eliminates the need to call `.to_plain()` manually in the common
 case and makes the default experience more predictable for log and
-snapshot use cases. - [254f2bc](https://github.com/liblaf/pretty/commit/254f2bc9ca0537a47c96b3514ba548acb0d10560) by [@liblaf](https://github.com/liblaf)
+snapshot use cases. - [254f2bc](https://github.com/liblaf/pprint/commit/254f2bc9ca0537a47c96b3514ba548acb0d10560) by [@liblaf](https://github.com/liblaf)
 
 ### ✨ Features
 
-- **(api)** expose spec-based pretty-printing API - [cd5f82f](https://github.com/liblaf/pretty/commit/cd5f82fefebd19292abb63256430541091fa5f09) by [@liblaf](https://github.com/liblaf)
-- **(api)** **\[breaking\]** introduce plower() and make pformat() return plain text - [254f2bc](https://github.com/liblaf/pretty/commit/254f2bc9ca0537a47c96b3514ba548acb0d10560) by [@liblaf](https://github.com/liblaf)
-- **(custom)** add lazy array summaries for NumPy, JAX, Torch, and Warp - [f72fbaf](https://github.com/liblaf/pretty/commit/f72fbafb6815d730733af133f6ee066104dfcc31) by [@liblaf](https://github.com/liblaf)
-- **(pretty)** **\[breaking\]** streamline public formatting API - [b05a605](https://github.com/liblaf/pretty/commit/b05a605178de5dc980c63f3f42173f0d8458f777) by [@liblaf](https://github.com/liblaf)
-- **(pretty)** **\[breaking\]** reorganize custom formatting and stage modules - [4320439](https://github.com/liblaf/pretty/commit/432043900a96f0e0d97c38b9b1a2c21064e164af) by [@liblaf](https://github.com/liblaf)
+- **(api)** expose spec-based pretty-printing API - [cd5f82f](https://github.com/liblaf/pprint/commit/cd5f82fefebd19292abb63256430541091fa5f09) by [@liblaf](https://github.com/liblaf)
+- **(api)** **\[breaking\]** introduce plower() and make pformat() return plain text - [254f2bc](https://github.com/liblaf/pprint/commit/254f2bc9ca0537a47c96b3514ba548acb0d10560) by [@liblaf](https://github.com/liblaf)
+- **(custom)** add lazy array summaries for NumPy, JAX, Torch, and Warp - [f72fbaf](https://github.com/liblaf/pprint/commit/f72fbafb6815d730733af133f6ee066104dfcc31) by [@liblaf](https://github.com/liblaf)
+- **(pretty)** **\[breaking\]** streamline public formatting API - [b05a605](https://github.com/liblaf/pprint/commit/b05a605178de5dc980c63f3f42173f0d8458f777) by [@liblaf](https://github.com/liblaf)
+- **(pretty)** **\[breaking\]** reorganize custom formatting and stage modules - [4320439](https://github.com/liblaf/pprint/commit/432043900a96f0e0d97c38b9b1a2c21064e164af) by [@liblaf](https://github.com/liblaf)
 
 ### 🐛 Bug Fixes
 
-- **(pretty)** keep multiline items from swallowing siblings - [f01fe93](https://github.com/liblaf/pretty/commit/f01fe935cdced5639af4614a3da0350320f38bc9) by [@liblaf](https://github.com/liblaf)
-- correct empty set and annotated value formatting - [8aaa619](https://github.com/liblaf/pretty/commit/8aaa619b9936718a138a5c5cad9884fc63e0e508) by [@liblaf](https://github.com/liblaf)
+- **(pretty)** keep multiline items from swallowing siblings - [f01fe93](https://github.com/liblaf/pprint/commit/f01fe935cdced5639af4614a3da0350320f38bc9) by [@liblaf](https://github.com/liblaf)
+- correct empty set and annotated value formatting - [8aaa619](https://github.com/liblaf/pprint/commit/8aaa619b9936718a138a5c5cad9884fc63e0e508) by [@liblaf](https://github.com/liblaf)
 
 ### 📝 Documentation
 
-- rewrite pretty docs around the public API - [430b150](https://github.com/liblaf/pretty/commit/430b1504ce08e4413ccd076abc7479abc0be3500) by [@liblaf](https://github.com/liblaf)
-- update README badges - [3148aa1](https://github.com/liblaf/pretty/commit/3148aa1af991eea247fb4db3adef9983d40eca57) by [@liblaf](https://github.com/liblaf)
+- rewrite pretty docs around the public API - [430b150](https://github.com/liblaf/pprint/commit/430b1504ce08e4413ccd076abc7479abc0be3500) by [@liblaf](https://github.com/liblaf)
+- update README badges - [3148aa1](https://github.com/liblaf/pprint/commit/3148aa1af991eea247fb4db3adef9983d40eca57) by [@liblaf](https://github.com/liblaf)
 
 ### ♻️ Code Refactoring
 
-- **(lowered)** simplify layout fits logic and annotation rendering - [8acc3a1](https://github.com/liblaf/pretty/commit/8acc3a15ddb214618db0d27090c405452a846e4c) by [@liblaf](https://github.com/liblaf)
-- **(pretty)** move trace and lower behavior onto model objects - [3d48cd2](https://github.com/liblaf/pretty/commit/3d48cd20351c8ee0ea81ab8d482b1ca56dba6773) by [@liblaf](https://github.com/liblaf)
+- **(lowered)** simplify layout fits logic and annotation rendering - [8acc3a1](https://github.com/liblaf/pprint/commit/8acc3a15ddb214618db0d27090c405452a846e4c) by [@liblaf](https://github.com/liblaf)
+- **(pretty)** move trace and lower behavior onto model objects - [3d48cd2](https://github.com/liblaf/pprint/commit/3d48cd20351c8ee0ea81ab8d482b1ca56dba6773) by [@liblaf](https://github.com/liblaf)
 
 ### 🛠 Builds
 
-- **(tooling)** adopt zensical docs and new release workflows - [f4412a2](https://github.com/liblaf/pretty/commit/f4412a2fbc30dba4fdaf24b9f6e273772c06ea9a) by [@liblaf](https://github.com/liblaf)
+- **(tooling)** adopt zensical docs and new release workflows - [f4412a2](https://github.com/liblaf/pprint/commit/f4412a2fbc30dba4fdaf24b9f6e273772c06ea9a) by [@liblaf](https://github.com/liblaf)
 
 ### ❤️ Contributors
 
 - [@liblaf](https://github.com/liblaf)
-- [@renovate[bot]](https://github.com/apps/renovate) made their first contribution in [#21](https://github.com/liblaf/pretty/pull/21)
+- [@renovate[bot]](https://github.com/apps/renovate) made their first contribution in [#21](https://github.com/liblaf/pprint/pull/21)
 
-## [v0.1.1](https://github.com/liblaf/pretty/releases/tag/v0.1.1) - 2026-03-29
+## [v0.1.1](https://github.com/liblaf/pprint/releases/tag/v0.1.1) - 2026-03-29
 
 ### 🐛 Bug Fixes
 
-- **(compile)** use inline item widths for container fit calculation - [51971fc](https://github.com/liblaf/pretty/commit/51971fc9392082c85f7fd78337ff012ddc1953d4) by [@liblaf](https://github.com/liblaf)
+- **(compile)** use inline item widths for container fit calculation - [51971fc](https://github.com/liblaf/pprint/commit/51971fc9392082c85f7fd78337ff012ddc1953d4) by [@liblaf](https://github.com/liblaf)
 
 ### 🛠 Builds
 
-- **(tooling)** unify automation around nox and uv - [b41aefa](https://github.com/liblaf/pretty/commit/b41aefaa2c2db1265390481e143b32402a397431) by [@liblaf](https://github.com/liblaf)
+- **(tooling)** unify automation around nox and uv - [b41aefa](https://github.com/liblaf/pprint/commit/b41aefaa2c2db1265390481e143b32402a397431) by [@liblaf](https://github.com/liblaf)
 
 ### ❤️ Contributors
 
 - [@liblaf[bot]](https://github.com/apps/liblaf)
 - [@liblaf](https://github.com/liblaf)
 
-## [v0.1.0](https://github.com/liblaf/pretty/releases/tag/v0.1.0) - 2026-03-16
+## [v0.1.0](https://github.com/liblaf/pprint/releases/tag/v0.1.0) - 2026-03-16
 
 ### ✨ Features
 
-- **(pretty)** bootstrap Rich-based pretty printer with tracing, lowering, and reference annotations - [a770896](https://github.com/liblaf/pretty/commit/a7708967f083c6cc980c18b0a71700fcc0991622) by [@liblaf](https://github.com/liblaf)
+- **(pretty)** bootstrap Rich-based pretty printer with tracing, lowering, and reference annotations - [a770896](https://github.com/liblaf/pprint/commit/a7708967f083c6cc980c18b0a71700fcc0991622) by [@liblaf](https://github.com/liblaf)
 
 ### 🐛 Bug Fixes
 
-- **(trace)** import logging in registry and refresh dependency specs - [6a9a725](https://github.com/liblaf/pretty/commit/6a9a725b97579bb9d4af613ad861c3e5f5c47ac0) by [@liblaf](https://github.com/liblaf)
+- **(trace)** import logging in registry and refresh dependency specs - [6a9a725](https://github.com/liblaf/pprint/commit/6a9a725b97579bb9d4af613ad861c3e5f5c47ac0) by [@liblaf](https://github.com/liblaf)
 
 ### ⚙️ Continuous Integrations
 
-- **(release-please)** add automated release workflow and configuration - [839ed13](https://github.com/liblaf/pretty/commit/839ed132e3ac4d9a21bbd1cd65c24e085ddfc036) by [@liblaf](https://github.com/liblaf)
+- **(release-please)** add automated release workflow and configuration - [839ed13](https://github.com/liblaf/pprint/commit/839ed132e3ac4d9a21bbd1cd65c24e085ddfc036) by [@liblaf](https://github.com/liblaf)
 
 ### ❤️ Contributors
 
-- [@liblaf[bot]](https://github.com/apps/liblaf) made their first contribution in [#4](https://github.com/liblaf/pretty/pull/4)
+- [@liblaf[bot]](https://github.com/apps/liblaf) made their first contribution in [#4](https://github.com/liblaf/pprint/pull/4)
 - [@liblaf](https://github.com/liblaf) made their first contribution

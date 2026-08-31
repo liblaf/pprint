@@ -2,7 +2,7 @@
 
 [project]
 # Basics
-site_name = "Pretty"
+site_name = "PPrint"
 site_url = "__SITE_URL__"
 site_description = "Format Python objects as repr-like plain text or width-aware Rich renderables."
 site_author = "liblaf"
@@ -10,23 +10,27 @@ site_author = "liblaf"
 nav = [
   { "Home" = "README.md" },
   { "Guides" = ["guides/custom-formatters.md"] },
+  { "Concepts" = ["concepts/references.md"] },
   { "API Reference" = [
-    { "<code class=\"doc-symbol doc-symbol-toc doc-symbol-module\"></code> pretty" = [
-      "reference/liblaf/pretty/README.md",
-      "reference/liblaf/pretty/common/README.md",
-      "reference/liblaf/pretty/custom/README.md",
-      "reference/liblaf/pretty/literals.md",
+    { "<code class=\"doc-symbol doc-symbol-toc doc-symbol-module\"></code> pprint" = [
+      "reference/liblaf/pprint/README.md",
+      "reference/liblaf/pprint/common/README.md",
+      "reference/liblaf/pprint/custom/README.md",
+      "reference/liblaf/pprint/literals.md",
       { "<code class=\"doc-symbol doc-symbol-toc doc-symbol-module\"></code> stages" = [
-        "reference/liblaf/pretty/stages/README.md",
-        "reference/liblaf/pretty/stages/lowered/README.md",
-        "reference/liblaf/pretty/stages/traced/README.md",
-        "reference/liblaf/pretty/stages/wrapped/README.md"
+        "reference/liblaf/pprint/stages/README.md",
+        "reference/liblaf/pprint/stages/compile/README.md",
+        "reference/liblaf/pprint/stages/lower/README.md",
+        "reference/liblaf/pprint/stages/lowered/README.md",
+        "reference/liblaf/pprint/stages/trace/README.md",
+        "reference/liblaf/pprint/stages/traced/README.md",
+        "reference/liblaf/pprint/stages/wrapped/README.md"
       ] }
     ] }
   ] }
 ]
 # Repository
-repo_url = "https://github.com/liblaf/pretty"
+repo_url = "https://github.com/liblaf/pprint"
 edit_uri = "edit/main/docs/"
 
 # ref: <https://zensical.org/docs/setup/extensions/#default-configuration>
@@ -92,7 +96,11 @@ default_handler = "python"
 enable_inventory = true
 
 [project.plugins.mkdocstrings.handlers.python]
-inventories = ["https://docs.python.org/3/objects.inv"]
+inventories = [
+  "https://docs.python.org/3/objects.inv",
+  "https://liblaf.github.io/conf/objects.inv",
+  "https://rich.readthedocs.io/en/stable/objects.inv"
+]
 
 [project.plugins.mkdocstrings.handlers.python.options]
 # General

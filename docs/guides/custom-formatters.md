@@ -1,6 +1,6 @@
 # Custom Formatters
 
-`liblaf.pretty` gives you four ways to customize formatting:
+`liblaf.pprint` gives you four ways to customize formatting:
 
 - Implement `__pretty__(self, ctx)` when you own the type.
 - Use `register_type()` for one concrete class.
@@ -21,6 +21,31 @@ Use the smallest hook that matches the problem:
 Builtin handlers already cover core containers, imported array libraries,
 `fieldz`-compatible models, and `__rich_repr__`, so reach for a custom hook only
 when the default behavior is not enough.
+
+## Declarative Containers
+
+For repr-like objects, the decorators keep a generator-based formatter small:
+
+```python
+from liblaf import pprint
+
+
+class Point:
+    def __init__(self, x: int, y: int = 0) -> None:
+        self.x = x
+        self.y = y
+
+    @pprint.container()
+    def __pretty__(self, ctx: pprint.Context):
+        yield ctx.field("x", self.x)
+        yield ctx.field("y", self.y, 0)
+```
+
+`@pprint.container()` uses `()` and does not impose an item limit.
+`@pprint.list()` uses `[]` and `max_list`; `@pprint.dict()` uses `{}` and
+`max_dict`. They accept `name`, `begin`, `end`, and `referable`. `ctx.item()`
+uses its explicit index in reference paths, while `field()` hides a matching
+default when `hide_defaults` is enabled.
 
 ## Resolution Order
 
@@ -68,7 +93,7 @@ handlers.
 ```python
 from rich.text import Text
 
-from liblaf.pretty import pformat, register_type
+from liblaf.pprint import pformat, register_type
 
 
 class Point:
@@ -94,8 +119,8 @@ print(pformat(Point(1, 2)), end="")
 Point(x=1, y=2)
 ```
 
-`ctx.container()` prefixes the object's type name automatically for
-referencable objects, so `begin` and `end` usually only need delimiters.
+`ctx.container()` prefixes the object's type name automatically for referable
+objects, so `begin` and `end` usually only need delimiters.
 
 `register_type()` uses `functools.singledispatch`, so subclasses also match
 unless you register something more specific.
@@ -114,9 +139,9 @@ unless you register something more specific.
 Use `Text` for `begin`, `end`, and custom leaf output. Those values flow
 through the Rich rendering pipeline and are not plain strings.
 
-`ctx.container()` is referencable by default, which means repeated appearances
+`ctx.container()` is referable by default, which means repeated appearances
 of the same object can later collapse into shared-reference tags. Use
-`ctx.leaf(..., referencable=False)` or `ctx.container(..., referencable=False)`
+`ctx.leaf(..., referable=False)` or `ctx.container(..., referable=False)`
 for inline summaries that should always render as a value.
 
 `ctx.name_value(name, value)` falls back to positional output when `name` is
@@ -158,10 +183,13 @@ been imported. It does not import the module for you. This is a good fit for
 optional dependencies such as array or tensor types that should not be imported
 just for pretty-printing.
 
+`register("module.Type")` is equivalent decorator sugar when the target has a
+stable import path.
+
 ```python
 from rich.text import Text
 
-from liblaf.pretty import register_lazy
+from liblaf.pprint import register_lazy
 
 
 @register_lazy("numpy", "ndarray")
@@ -169,7 +197,7 @@ def _pretty_ndarray(obj, ctx):
     return ctx.leaf(
         obj,
         Text(f"ndarray(shape={obj.shape!r}, dtype={obj.dtype!s})", "repr.tag_name"),
-        referencable=False,
+        referable=False,
     )
 ```
 
@@ -185,6 +213,6 @@ Containers built with `ctx.container()` participate in shared-reference
 tracking by default. That is usually what you want for mappings, sets,
 frozensets, and object-like containers.
 
-Use `referencable=False` when a formatter is really just an inline summary.
+Use `referable=False` when a formatter is really just an inline summary.
 Builtin scalar handlers and list-like sequence handlers use that path so they
-always render their value instead of collapsing into `<Type @ hexid>` markers.
+always render their value instead of collapsing into `<Type @ path>` markers.
