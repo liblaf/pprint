@@ -1,58 +1,36 @@
 # PPrint
 
-`liblaf.pprint` formats Python objects as repr-like output. Use it when you
-want compact plain text for logs and snapshots, or a Rich renderable that wraps
-against the target console width.
+`liblaf.pprint` presents Python values for terminals, logs, and snapshots. It
+replaces familiar pretty-printing workflows with a capability-led interface,
+not a drop-in copy of another library's functions.
 
-## Quick Start
+## One presentation, three destinations
 
-`pformat()` returns plain text:
-
-```python
-from liblaf.pprint import pformat
-
-print(pformat({"alpha": [1, 2, 3]}), end="")
-```
-
-```text
-{'alpha': [1, 2, 3]}
-```
-
-Use `render()` when you need Rich to choose the layout later:
+`pretty()` constructs a `Pretty` object once. Pass it to Rich when the target
+console should choose line breaks; use `.text()` for a deterministic snapshot;
+or use `.show()` for immediate terminal output.
 
 ```python
 from rich.console import Console
 
-from liblaf.pprint import render
+from liblaf.pprint import pretty
 
-console = Console(
-    width=12,
-    color_system=None,
-    soft_wrap=True,
-    no_color=True,
-    markup=False,
-    emoji=False,
-    highlight=False,
-)
+presentation = pretty({"alpha": [1, 2, 3]})
 
-console.print(render({"alpha": [1, 2, 3]}))
+assert presentation.text() == "{'alpha': [1, 2, 3]}"
+Console(width=12).print(presentation)
+presentation.show()
 ```
 
-```text
-{
-|   'alpha': [
-|   |   1,
-|   |   2, 3
-|   ]
-}
-```
+`Pretty.text(width=88)` returns text without a trailing newline. Its fixed,
+markup-safe console makes snapshots reproducible. `Pretty.show()` writes to a
+provided Rich console or the active global one, and emits exactly one final
+newline. Rich rendering remains width-aware because `Pretty` implements
+`__rich_console__`.
 
-If you already have a Rich console, `pprint()` and its alias `pp()` format and
-print in one call.
+## Formatting options
 
-## Formatting Options
-
-The public helpers accept the same keyword overrides:
+`pretty()` and `format_frame_variables()` accept the same keyword overrides:
 
 | Keyword | Default | Meaning |
 | --- | --- | --- |
@@ -67,30 +45,23 @@ The public helpers accept the same keyword overrides:
 | `hide_defaults` | `True` | Hide default-valued `fieldz` and `__rich_repr__` fields. |
 
 Each value can also come from a `PPRINT_*` environment variable. For example,
-`PPRINT_MAX_LIST=1` has the same effect as `pformat(obj, max_list=1)`.
+`PPRINT_MAX_LIST=1` has the same effect as `pretty(obj, max_list=1)`.
 
 `indent` accepts plain text, Rich markup, ANSI-colored text, or
 `rich.text.Text`.
 
-## Built In
+## Built in
 
-`liblaf.pprint` handles these cases without extra registration:
-
-- scalar values through bounded repr output
-- `dict`, `list`, `tuple`, `set`, and `frozenset`
-- compact dtype-and-shape summaries for imported NumPy, JAX, Torch, and Warp
-  arrays
-- `fieldz`-compatible models, including common `attrs` classes
-- objects with `__rich_repr__`
-- fallback repr output for everything else
-
-`hide_defaults=True` applies to both `fieldz`-compatible models and
-`__rich_repr__` output:
+`liblaf.pprint` handles scalar values, `dict`, `list`, `tuple`, `set`, and
+`frozenset` without registration. It recognizes `fieldz`-compatible models,
+objects with `__rich_repr__`, and imported NumPy, JAX, Torch, and Warp arrays.
+Optional array integrations stay lazy: no optional framework is imported merely
+to format an ordinary Python value.
 
 ```python
 import attrs
 
-from liblaf.pprint import pformat
+from liblaf.pprint import pretty
 
 
 @attrs.define
@@ -99,52 +70,26 @@ class Point:
     y: int = 2
 
 
-print(pformat(Point()))
-print(pformat(Point(), hide_defaults=False), end="")
+assert pretty(Point()).text() == "Point()"
+assert pretty(Point(), hide_defaults=False).text() == "Point(x=1, y=2)"
 ```
 
-```text
-Point()
-Point(x=1, y=2)
-```
+Arrays whose every dimension is shorter than `max_array` retain their normal
+repr; larger arrays use a compact dtype, shape, framework, and, when exposed,
+device summary.
 
-Objects with `__rich_repr__` can mix named and positional items. Falsey names
-fall back to positional output, so `("", value)` and `(None, value)` render the
-same way as explicit positional items.
+## Reference tracking
 
-Array integrations are lazy. `liblaf.pprint` does not import optional array
-libraries, but once one is present in `sys.modules`, arrays with any dimension
-at least `max_array` render as compact summaries:
+Referable objects are annotated at their first and shallowest appearance, then
+replaced by a path reference later. Cycles stay readable without losing object
+identity. If an anchor path exceeds `max_other`, the tag falls back to a compact
+hexadecimal identity.
 
 ```python
-import numpy as np
-
-from liblaf.pprint import pformat
-
-print(pformat(np.zeros(5, dtype=np.float32)), end="")
-```
-
-```text
-f32[5](numpy)
-```
-
-Arrays whose every dimension is shorter than `max_array` keep their normal
-repr. All other arrays use a compact dtype, shape, framework, and (where the
-framework exposes it) device summary.
-
-## Reference Tracking
-
-Referable objects are annotated at their first (and therefore shallowest)
-appearance and replaced by a reference to that path later. This keeps recursive
-and shared structures readable without losing identity information. If an
-anchor path exceeds `max_other`, the tag falls back to the object's hexadecimal
-identity so the reference itself remains compact.
-
-```python
-from liblaf.pprint import pformat
+from liblaf.pprint import pretty
 
 child = {"x": 1}
-print(pformat({"left": child, "right": child}), end="")
+print(pretty({"left": child, "right": child}).text())
 ```
 
 ```text
@@ -154,39 +99,38 @@ print(pformat({"left": child, "right": child}), end="")
 }
 ```
 
-Lists and tuples repeat their value instead of becoming reference tags. Custom
-containers are referable by default, and custom leaves can opt in or out.
+## Custom formatting
 
-## Custom Formatting
-
-Use the smallest hook that matches the object you want to format:
-
-- Implement `__pretty__(self, ctx)` when you own the class.
-- Use `register()` or `register_type()` for a concrete class and its subclasses.
-- Use `register_func()` for structural matching.
-- Use `register_lazy()` for optional dependencies that should only activate
-  after their module is already imported.
-
-`PrettyContext` gives custom formatters the builder helpers they usually need:
-`ctx.container()`, `ctx.leaf()`, `ctx.item()`, `ctx.positional()`,
-`ctx.name_value()`, and `ctx.key_value()`. For ordinary repr-like custom
-containers, the `container`, `list`, and `dict` decorators add punctuation and
-apply the matching configured size limit.
+Implement `__pretty__(self, ctx)` when you own a type. Use `register()` or
+`register_type()` for concrete classes, `register_func()` for structural
+matching, and `register_lazy()` for optional dependencies. `PrettyContext`
+provides builders for containers, leaves, positional items, name-value items,
+and key-value items. The `container`, `list`, and `dict` decorators add the
+ordinary repr-like punctuation and respect their configured limits.
 
 See [Custom Formatters](guides/custom-formatters.md) for examples.
 
-## Pipeline
+## Frame-variable batches
 
-The public path is:
+`format_frame_variables()` is a narrow integration seam for traceback-style
+renderers. It accepts ordered local-variable mappings, traces references across
+the complete batch, and returns one tuple of `name = value` strings per frame.
+The caller retains filenames, source excerpts, headings, and final output.
 
-1. `render()` wraps the object, traces shared references, and lowers the result.
-2. Rich renders the lowered object against a `Console`.
-3. `pformat()` captures that renderable as plain text with a safe default
-   console.
+```python
+from liblaf.pprint import format_frame_variables
 
-The `stages.wrapped`, `stages.traced`, and `stages.lowered` packages expose the
-pipeline pieces for maintainers and advanced integrations. Most users only need
-the public helpers and `PrettyContext`.
+shared = {"answer": 42}
+frames = format_frame_variables(({"payload": shared}, {"again": shared}))
+
+assert frames[1] == ("again = <dict @ $frames[0].payload>",)
+```
+
+## Internal pipeline
+
+`Pretty` owns the wrapped, traced, and lowered pipeline internally. The
+individual stages remain implementation details rather than a root-level
+extension surface. Custom formatters should use `PrettyContext` instead.
 
 See the [API reference](reference/liblaf/pprint/README.md) for signatures and
 source-backed docstrings.

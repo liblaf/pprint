@@ -1,5 +1,5 @@
-from . import common, custom, literals, stages
-from ._api import pformat, pformat_frames, plower, pp, pprint, render
+from . import common, custom, literals
+from ._api import Pretty, format_frame_variables, pretty
 from ._config import PrettyConfig, PrettyOptions, PrettyOverrides, config
 from .custom import (
     Context,
@@ -16,6 +16,7 @@ from .custom import (
 
 __all__ = [
     "Context",
+    "Pretty",
     "PrettyConfig",
     "PrettyContext",
     "PrettyHandler",
@@ -26,17 +27,12 @@ __all__ = [
     "container",
     "custom",
     "dict",
+    "format_frame_variables",
     "list",
     "literals",
-    "pformat",
-    "pformat_frames",
-    "plower",
-    "pp",
-    "pprint",
+    "pretty",
     "register",
     "register_func",
     "register_lazy",
     "register_type",
-    "render",
-    "stages",
 ]

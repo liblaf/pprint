@@ -1089,7 +1089,7 @@ build = [
 dev = [
     { name = "cupy-cuda13x", specifier = ">=14" },
     { name = "jax", specifier = ">=0.10" },
-    { name = "numpy", specifier = ">=2" },
+    { name = "numpy", specifier = ">=2.3.3" },
     { name = "torch", specifier = ">=2" },
     { name = "warp-lang", specifier = ">=1" },
 ]
@@ -1110,7 +1110,7 @@ nox = [{ name = "nox", specifier = ">=2026" }]
 test = [
     { name = "cupy-cuda13x", specifier = ">=14" },
     { name = "jax", specifier = ">=0.10" },
-    { name = "numpy", specifier = ">=2" },
+    { name = "numpy", specifier = ">=2.3.3" },
     { name = "pytest", specifier = ">=9" },
     { name = "pytest-codspeed", specifier = ">=4" },
     { name = "pytest-cov", specifier = ">=7" },

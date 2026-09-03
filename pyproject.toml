@@ -3,7 +3,7 @@
 
 [project]
 name = "liblaf-pprint"
-description = "Format Python objects as repr-like plain text or width-aware Rich renderables."
+description = "Present Python values through one Rich-capable, text-capturable presentation."
 readme = "README.md"
 requires-python = ">=3.12"
 license = "MIT"
@@ -46,7 +46,15 @@ dynamic = ["version"]
 "Source Code" = "https://github.com/liblaf/pprint"
 
 [dependency-groups]
-dev = ["cupy-cuda13x>=14", "jax>=0.10", "numpy>=2", "torch>=2", "warp-lang>=1"]
+dev = [
+  "cupy-cuda13x>=14",
+  "jax>=0.10",
+  # ref: <https://numpy.org/doc/stable/release/2.3.3-notes.html>
+  # NumPy 2.3.3 supports every Python version in this project's test matrix.
+  "numpy>=2.3.3",
+  "torch>=2",
+  "warp-lang>=1"
+]
 build = ["check-wheel-contents>=0.6", "hatch>=1", "twine>=6"]
 docs = [
   "griffe-fieldz>=0.5",

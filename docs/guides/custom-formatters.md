@@ -93,7 +93,7 @@ handlers.
 ```python
 from rich.text import Text
 
-from liblaf.pprint import pformat, register_type
+from liblaf.pprint import pretty, register_type
 
 
 class Point:
@@ -112,7 +112,7 @@ def _pretty_point(obj: Point, ctx):
     )
 
 
-print(pformat(Point(1, 2)), end="")
+print(pretty(Point(1, 2)).text())
 ```
 
 ```text

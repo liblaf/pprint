@@ -1,10 +1,8 @@
-"""Public API for `liblaf.pprint`.
+"""Readable Python-value presentations for terminals, logs, and snapshots.
 
-Import [`pformat`][liblaf.pprint.pformat] when you want plain text,
-[`plower`][liblaf.pprint.plower] when you want the width-aware Rich renderable,
-[`pprint`][liblaf.pprint.pprint] or [`pp`][liblaf.pprint.pp] when you want to
-print immediately, and the registration helpers when you need to teach the
-formatter about custom types.
+Use [`pretty`][liblaf.pprint.pretty] to construct a
+[`Pretty`][liblaf.pprint.Pretty] presentation, then hand it to Rich, capture
+plain text with `.text()`, or emit it with `.show()`.
 """
 
 from lazy_loader import attach_stub

@@ -4,7 +4,7 @@
 # Basics
 site_name = "PPrint"
 site_url = "__SITE_URL__"
-site_description = "Format Python objects as repr-like plain text or width-aware Rich renderables."
+site_description = "Present Python values through one Rich-capable presentation."
 site_author = "liblaf"
 # Navigation
 nav = [
@@ -17,15 +17,6 @@ nav = [
       "reference/liblaf/pprint/common/README.md",
       "reference/liblaf/pprint/custom/README.md",
       "reference/liblaf/pprint/literals.md",
-      { "<code class=\"doc-symbol doc-symbol-toc doc-symbol-module\"></code> stages" = [
-        "reference/liblaf/pprint/stages/README.md",
-        "reference/liblaf/pprint/stages/compile/README.md",
-        "reference/liblaf/pprint/stages/lower/README.md",
-        "reference/liblaf/pprint/stages/lowered/README.md",
-        "reference/liblaf/pprint/stages/trace/README.md",
-        "reference/liblaf/pprint/stages/traced/README.md",
-        "reference/liblaf/pprint/stages/wrapped/README.md"
-      ] }
     ] }
   ] }
 ]

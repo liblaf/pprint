@@ -13,9 +13,10 @@ _Avoid_: Item, input
 One complete interpretation of a value using a single resolved option set.
 _Avoid_: Render, print
 
-**Renderable**:
-A presentation whose final line breaking is chosen for a target console.
-_Avoid_: String, representation
+**Pretty**:
+A stable presentation of one value that can be rendered by Rich, captured as
+plain text, or shown on a console.
+_Avoid_: Lowered node, formatter result
 
 **Reference**:
 A later occurrence of a referable value whose shallowest first occurrence

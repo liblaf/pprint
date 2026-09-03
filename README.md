@@ -14,9 +14,11 @@
 
 </div>
 
-`liblaf.pprint` formats Python values as compact plain text or width-aware Rich
-renderables. It handles bounded containers, custom types, cycles, and shared
-object identities without importing optional array frameworks.
+`liblaf.pprint` presents Python values for terminals, logs, and snapshots. Its
+single entry point, `pretty()`, returns a stable Rich-capable `Pretty` object;
+choose plain text with `.text()` or terminal output with `.show()`. It handles
+bounded containers, custom types, cycles, and shared object identities without
+importing optional array frameworks.
 
 ## Installation
 
@@ -31,16 +33,18 @@ pip install liblaf-pprint
 ```python
 from rich.console import Console
 
-from liblaf.pprint import pformat, render
+from liblaf.pprint import pretty
 
 value = {"answer": [1, 2, 3]}
-assert pformat(value) == "{'answer': [1, 2, 3]}"
-Console(width=12).print(render(value))
+presentation = pretty(value)
+assert presentation.text() == "{'answer': [1, 2, 3]}"
+Console(width=12).print(presentation)
 ```
 
-Use `pformat()` for text, `render()` for a Rich renderable, and `pprint()` (or
-`pp()`) to print immediately. `plower()` remains available for integrations
-that intentionally depend on the current lowered stage.
+`Pretty` has one value-oriented interface across these destinations: pass it to
+Rich for late-bound layout, use `.text(width=...)` for deterministic text, or
+use `.show()` to write exactly one final newline. Its internal lowering stages
+are not root API.
 
 Custom formatters can be concise generators:
 
@@ -55,7 +59,7 @@ class Point:
         yield ctx.field("y", 0, 0)
 
 
-assert pprint.pformat(Point()) == "Point(x=1)"
+assert pprint.pretty(Point()).text() == "Point(x=1)"
 ```
 
 Use `@pprint.list()` and `@pprint.dict()` for bounded list- and mapping-shaped
@@ -64,16 +68,17 @@ output. `register()` accepts both a type and a lazy `"module.Type"` target;
 
 ## Traceback variables
 
-`pformat_frames()` formats local-variable mappings from multiple frames in one
-pass. It returns one tuple of `name = value` lines per input frame; the caller
-retains ownership of filenames, source excerpts, and frame headings. References
-therefore remain meaningful even when a value first appears in another frame.
+`format_frame_variables()` is the batch seam for traceback renderers. It formats
+local-variable mappings from multiple frames in one pass and returns one tuple
+of `name = value` lines per input frame. The caller retains ownership of
+filenames, source excerpts, and frame headings, while references remain
+meaningful even when a value first appears in another frame.
 
 ```python
-from liblaf.pprint import pformat_frames
+from liblaf.pprint import format_frame_variables
 
 shared = {"answer": 42}
-frames = pformat_frames(({"payload": shared}, {"again": shared}))
+frames = format_frame_variables(({"payload": shared}, {"again": shared}))
 
 assert frames[1] == ("again = <dict @ $frames[0].payload>",)
 ```

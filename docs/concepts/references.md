@@ -5,7 +5,8 @@ breadth-first appearance of a referable value is its anchor; later appearances
 become `<Type @ path>` references. This prevents cycles from expanding forever
 and makes shared values visible in logs and tracebacks.
 
-Paths start at `$` for `pformat()` and at `$frames` for `pformat_frames()`.
+Paths start at `$` for `pretty()` and at `$frames` for
+`format_frame_variables()`.
 If an anchor path would exceed `max_other`, the formatter uses the object's
 hexadecimal identity instead, keeping the reference itself bounded.
 

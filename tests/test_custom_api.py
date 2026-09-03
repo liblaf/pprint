@@ -5,7 +5,7 @@ import types
 from collections.abc import Iterator
 
 from liblaf import pprint
-from liblaf.pprint.stages.wrapped import WrappedItem
+from liblaf.pprint.stages.wrapped import WrappedItem, WrappedNode
 
 
 def test_container_decorator_and_context_item_vocabulary() -> None:
@@ -25,8 +25,8 @@ def test_container_decorator_and_context_item_vocabulary() -> None:
             yield ctx.item(0, "value")
             yield ctx.key_value("answer", 42)
 
-    assert pprint.pformat(Point()) == "Point(x=1)"
-    assert pprint.pformat(Alias()) == "Named('value', 'answer': 42)"
+    assert pprint.pretty(Point()).text() == "Point(x=1)"
+    assert pprint.pretty(Alias()).text() == "Named('value', 'answer': 42)"
 
 
 def test_list_and_dict_decorators_use_their_option_limits() -> None:
@@ -42,8 +42,8 @@ def test_list_and_dict_decorators_use_their_option_limits() -> None:
             for index in range(3):
                 yield ctx.key_value(index, index)
 
-    assert pprint.pformat(Sequence(), max_list=1) == "Sequence[0, ...]"
-    assert pprint.pformat(Mapping(), max_dict=1) == "Mapping{0: 0, ...}"
+    assert pprint.pretty(Sequence(), max_list=1).text() == "Sequence[0, ...]"
+    assert pprint.pretty(Mapping(), max_dict=1).text() == "Mapping{0: 0, ...}"
 
 
 def test_container_uses_item_indexes_and_referable_spelling() -> None:
@@ -55,7 +55,7 @@ def test_container_uses_item_indexes_and_referable_spelling() -> None:
             yield ctx.item(7, child)
             yield ctx.item(8, child)
 
-    output = pprint.pformat(Indexed())
+    output = pprint.pretty(Indexed()).text()
 
     assert "# <Indexed" not in output
     assert "<dict @ $[7]>" in output
@@ -73,11 +73,9 @@ def test_register_accepts_lazy_module_type_syntax() -> None:
     try:
 
         @pprint.register(f"{module_name}.Target")
-        def format_target(
-            obj: Target, ctx: pprint.Context
-        ) -> pprint.stages.wrapped.WrappedNode:
+        def format_target(obj: Target, ctx: pprint.Context) -> WrappedNode:
             return ctx.leaf(obj, pprint.literals.ELLIPSIS, referable=False)
 
-        assert pprint.pformat(Target()) == "..."
+        assert pprint.pretty(Target()).text() == "..."
     finally:
         del sys.modules[module_name]

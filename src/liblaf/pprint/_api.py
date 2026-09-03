@@ -1,16 +1,16 @@
-"""Top-level formatting helpers.
+"""Capability-led public presentations for Python values.
 
-These functions are the public entry point into the wrapped, traced, and
-lowered pipeline that powers `liblaf.pprint`. Use [`pformat`][liblaf.pprint.pformat]
-for captured plain text, [`render`][liblaf.pprint.render] for a Rich renderable,
-and [`pprint`][liblaf.pprint.pprint] for console output.
+[`pretty`][liblaf.pprint.pretty] constructs a [`Pretty`][liblaf.pprint.Pretty]
+presentation. The presentation can be handed to Rich, captured as deterministic
+plain text, or shown immediately.
 """
 
 from collections.abc import Iterable, Mapping
 from typing import Any, Unpack
 
+import attrs
 import rich
-from rich.console import Console, RenderableType
+from rich.console import Console, ConsoleOptions, RenderResult
 from rich.text import Text
 
 from liblaf.pprint.custom import PrettyContext
@@ -27,82 +27,109 @@ from liblaf.pprint.stages.wrapped import WrappedNode, WrappedPositionalItem
 from ._config import PrettyOptions, PrettyOverrides, config
 
 
-def pformat(obj: Any, **kwargs: Unpack[PrettyOverrides]) -> str:
-    """Format `obj` as plain text.
+@attrs.frozen
+class Pretty:
+    """A reusable, Rich-capable presentation of one Python value.
 
-    This helper lowers the object and captures the Rich renderable with a safe
-    default console. Use [`render`][liblaf.pprint.render] when the final layout
-    should depend on a specific Rich console width.
+    `Pretty` is the stable public presentation boundary. It keeps the lowered
+    pipeline node private while exposing three deliberate capabilities:
+    pass it to a Rich console, call [`text`][liblaf.pprint.Pretty.text] for a
+    deterministic plain-text snapshot, or call
+    [`show`][liblaf.pprint.Pretty.show] for terminal output.
+    """
+
+    _lowered: LoweredNode = attrs.field(repr=False)
+
+    def __rich_console__(
+        self, console: Console, options: ConsoleOptions
+    ) -> RenderResult:
+        """Render through Rich with line breaking chosen by `console`."""
+        yield from self._lowered.__rich_console__(console, options)
+
+    def text(self, *, width: int = 88) -> str:
+        """Return a deterministic plain-text snapshot.
+
+        Args:
+            width: Target terminal width used to choose flat or broken layouts.
+
+        Returns:
+            The presentation without a trailing newline.
+
+        Raises:
+            AssertionError: If `width` is not positive.
+        """
+        assert width > 0
+        console = Console(
+            color_system=None,
+            soft_wrap=True,
+            width=width,
+            no_color=True,
+            markup=False,
+            emoji=False,
+            highlight=False,
+        )
+        return self._lowered.to_plain(console=console).rstrip("\n")
+
+    def show(self, *, console: Console | None = None) -> None:
+        """Write this presentation to `console` with exactly one final newline."""
+        if console is None:
+            console = rich.get_console()
+        console.print(self)
+        # Lowered renderables own their segments, so Rich cannot append `end`
+        # to their final segment. This empty print owns the one final newline.
+        console.print()
+
+
+def pretty(value: Any, **overrides: Unpack[PrettyOverrides]) -> Pretty:
+    """Construct a Rich-capable presentation of `value`.
 
     Args:
-        obj: Object to format.
-        **kwargs: Per-call overrides merged with [`config`][liblaf.pprint.config].
+        value: Python value to present.
+        **overrides: Per-call overrides merged with
+            [`config`][liblaf.pprint.config].
 
     Returns:
-        Plain-text repr-like output.
+        A presentation that can be rendered by Rich, captured with `.text()`,
+        or emitted with `.show()`.
 
     Examples:
-        >>> pformat({"answer": [1, 2]})
+        >>> pretty({"answer": [1, 2]}).text()
         "{'answer': [1, 2]}"
     """
-    lowered: LoweredNode = _lower(obj, **kwargs)
-    return lowered.to_plain()
+    return Pretty(_lower(value, **overrides))
 
 
-def render(obj: Any, **kwargs: Unpack[PrettyOverrides]) -> RenderableType:
-    """Build a Rich renderable for `obj`.
-
-    The returned lowered node chooses between flat and broken layouts when Rich
-    renders it through a `Console`.
-
-    Args:
-        obj: Object to format.
-        **kwargs: Per-call overrides merged with [`config`][liblaf.pprint.config].
-
-    Returns:
-        A width-aware Rich renderable.
-    """
-    return _lower(obj, **kwargs)
-
-
-def _lower(obj: Any, **kwargs: Unpack[PrettyOverrides]) -> LoweredNode:
-    """Run the internal wrapped-to-lowered pipeline for one object."""
-    options: PrettyOptions = PrettyOptions(**{**config.to_dict(), **kwargs})
-    pretty_ctx: PrettyContext = PrettyContext(options=options)
-    wrapped: WrappedNode = pretty_ctx.wrap_lazy(obj)
+def _lower(value: Any, **overrides: Unpack[PrettyOverrides]) -> LoweredNode:
+    """Run the internal wrapped-to-lowered pipeline for one value."""
+    options = PrettyOptions(**{**config.to_dict(), **overrides})
+    pretty_ctx = PrettyContext(options=options)
+    wrapped: WrappedNode = pretty_ctx.wrap_lazy(value)
     traced: TracedNode = pretty_ctx.trace(wrapped)
     lower_ctx: LowerContext = pretty_ctx.finish()
-    lowered: LoweredNode = traced.lower(lower_ctx)
-    return lowered
+    return traced.lower(lower_ctx)
 
 
-def pformat_frames(
-    frames: Iterable[Mapping[str, Any]], **kwargs: Unpack[PrettyOverrides]
+def format_frame_variables(
+    frames: Iterable[Mapping[str, Any]], **overrides: Unpack[PrettyOverrides]
 ) -> tuple[tuple[str, ...], ...]:
-    """Format local-variable mappings from several frames in one pass.
+    """Format frame-local variable mappings with one shared reference graph.
 
     Each returned inner tuple contains the ``name = value`` lines for one input
-    frame. The function deliberately does not add filenames, source excerpts, or
-    frame headings: callers such as traceback renderers own that presentation.
-    Shared values are nevertheless traced across every supplied frame. Their
-    tags use ``$frames[frame-index].variable`` paths.
+    frame. The caller owns filenames, source excerpts, frame headings, and the
+    final traceback presentation. Shared values are traced across every
+    supplied frame; tags use ``$frames[frame-index].variable`` paths.
 
     Args:
         frames: Frame-local mappings in traceback order. Mapping iteration order
             becomes variable display order.
-        **kwargs: Per-call overrides merged with [`config`][liblaf.pprint.config].
+        **overrides: Per-call overrides merged with
+            [`config`][liblaf.pprint.config].
 
     Returns:
         Plain variable lines grouped by input frame.
-
-    Examples:
-        >>> shared = {"answer": 42}
-        >>> lines = pformat_frames(({"payload": shared}, {"again": shared}))
-        >>> lines[1]
-        ('again = <dict @ $frames[0].payload>',)
     """
-    options: PrettyOptions = PrettyOptions(**{**config.to_dict(), **kwargs})
-    pretty_ctx: PrettyContext = PrettyContext(options=options)
+    options = PrettyOptions(**{**config.to_dict(), **overrides})
+    pretty_ctx = PrettyContext(options=options)
     wrapped_frames: list[WrappedPositionalItem] = []
     for index, variables in enumerate(frames):
         children = [
@@ -143,37 +170,3 @@ def pformat_frames(
             lines.append(variable.lower(lower_ctx).to_plain().rstrip("\n"))
         formatted.append(tuple(lines))
     return tuple(formatted)
-
-
-def plower(obj: Any, **kwargs: Unpack[PrettyOverrides]) -> LoweredNode:
-    """Build the concrete lowered node used by [`render`][liblaf.pprint.render].
-
-    This advanced compatibility interface exposes the current final stage. New
-    callers should depend on `render()`, whose interface promises only Rich's
-    renderable protocol rather than a pipeline implementation type.
-    """
-    return _lower(obj, **kwargs)
-
-
-def pprint(
-    obj: Any, *, console: Console | None = None, **kwargs: Unpack[PrettyOverrides]
-) -> None:
-    """Format `obj` and print it through a Rich console.
-
-    This is the side-effecting companion to [`render`][liblaf.pprint.render].
-
-    Args:
-        obj: Object to format.
-        console: Console to render into. When omitted, the active global Rich console
-            is used.
-        **kwargs: Per-call overrides merged with [`config`][liblaf.pprint.config].
-    """
-    if console is None:
-        console: Console = rich.get_console()
-    console.print(render(obj, **kwargs))
-    # Lowered renderables yield their own segments, so Rich's `end` argument
-    # cannot add a newline after them. An empty print owns that final line.
-    console.print()
-
-
-pp = pprint

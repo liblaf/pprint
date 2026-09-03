@@ -100,9 +100,8 @@ class PrettyConfig(conf.BaseConfig):
     """Environment-backed defaults for the pretty printer.
 
     Values are loaded from `PPRINT_*` variables and can be overridden per call with
-    [`pformat`][liblaf.pprint.pformat] or [`pprint`][liblaf.pprint.pprint].
-    `PPRINT_INDENT` accepts the same markup and ANSI inputs as the per-call
-    `indent` override.
+    [`pretty`][liblaf.pprint.pretty]. `PPRINT_INDENT` accepts the same markup
+    and ANSI inputs as the per-call `indent` override.
     """
 
     env_prefix: ClassVar[str] = "PPRINT_"
