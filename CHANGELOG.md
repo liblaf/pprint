@@ -7,14 +7,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Conventional Changelog](https://github.com/conventional-changelog/conventional-changelog-config-spec/blob/master/versions/2.2.0/README.md),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.3.0](https://github.com/liblaf/pprint/releases/tag/v0.3.0) - 2026-09-04
+
+### 💥 BREAKING CHANGES
+
+- replace liblaf-pretty and liblaf.pretty with liblaf-pprint and liblaf.pprint; no compatibility import is provided. - [a608e3c](https://github.com/liblaf/pprint/commit/a608e3c853bc11cb48912cb3d5a6f2b78934d583) by [@liblaf](https://github.com/liblaf)
+- remove pformat(), render(), pprint(), pp(), plower(), and root stages; rename pformat_frames() to format_frame_variables(). - [d229986](https://github.com/liblaf/pprint/commit/d2299867218140740847557a5aa78955be649b3c) by [@liblaf](https://github.com/liblaf)
+
+### ✨ Features
+
+- add staged pretty-print pipeline - [fc48df6](https://github.com/liblaf/pprint/commit/fc48df608858fc85671bd68cd86c028280a45510) by [@liblaf](https://github.com/liblaf)
+- **\[breaking\]** rename pretty to pprint - [a608e3c](https://github.com/liblaf/pprint/commit/a608e3c853bc11cb48912cb3d5a6f2b78934d583) by [@liblaf](https://github.com/liblaf)
+- **\[breaking\]** introduce Pretty presentation interface - [d229986](https://github.com/liblaf/pprint/commit/d2299867218140740847557a5aa78955be649b3c) by [@liblaf](https://github.com/liblaf)
+
+### ❤️ Contributors
+
+- [@renovate[bot]](https://github.com/apps/renovate)
+- [@liblaf](https://github.com/liblaf)
+
 ## [v0.2.0](https://github.com/liblaf/pprint/releases/tag/v0.2.0) - 2026-05-05
 
 ### 💥 BREAKING CHANGES
 
 - **(pretty)** top-level PrettyOptions, Spec types, pdoc, and registry helpers are no longer exported; custom pretty hooks now use **pretty**(ctx, depth), and formatting options are passed as keyword overrides instead of a PrettyOptions object. - [b05a605](https://github.com/liblaf/pprint/commit/b05a605178de5dc980c63f3f42173f0d8458f777) by [@liblaf](https://github.com/liblaf)
-- **(pretty)** the old internal \_conf, \_describe, \_lower, \_spec, and \_trace modules are replaced by common, custom, literals, and stages packages, and custom **pretty** hooks now receive only ctx instead of ctx, depth - [4320439](https://github.com/liblaf/pprint/commit/432043900a96f0e0d97c38b9b1a2c21064e164af) by [@liblaf](https://github.com/liblaf)
+- **(pretty)** the old internal _conf, _describe, _lower, _spec, and _trace modules are replaced by common, custom, literals, and stages packages, and custom **pretty** hooks now receive only ctx instead of ctx, depth - [4320439](https://github.com/liblaf/pprint/commit/432043900a96f0e0d97c38b9b1a2c21064e164af) by [@liblaf](https://github.com/liblaf)
 - **(api)** `pformat()` now returns `str` instead of `LoweredNode`.
-  Use `plower()` for the old behavior where a Rich renderable is returned.
+Use `plower()` for the old behavior where a Rich renderable is returned.
 
 Split the public API into two clear paths:
 
@@ -54,6 +72,7 @@ snapshot use cases. - [254f2bc](https://github.com/liblaf/pprint/commit/254f2bc9
 
 ### ❤️ Contributors
 
+- [@liblaf-release-please[bot]](https://github.com/apps/liblaf-release-please) made their first contribution in [#15](https://github.com/liblaf/pprint/pull/15)
 - [@liblaf](https://github.com/liblaf)
 - [@renovate[bot]](https://github.com/apps/renovate) made their first contribution in [#21](https://github.com/liblaf/pprint/pull/21)
 
